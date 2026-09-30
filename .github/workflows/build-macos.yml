@@ -16,8 +16,8 @@ jobs:
           python-version: '3.12'
       - run: |
           pip install pyinstaller pygame
-          pyinstaller --onefile --add-data "res:res" main.py
+          pyinstaller --onedir --add-data "res:res" main.py
       - uses: actions/upload-artifact@v4
         with:
-          name: macOS-Game-Executable
-          path: dist/main
+          name: macOS-Game-Folder
+          path: dist/main/
