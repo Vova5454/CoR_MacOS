@@ -16,13 +16,13 @@ jobs:
           python-version: '3.12'
       - run: |
           pip install pyinstaller pygame
-          pyinstaller --onedir --name "run" main.py
+          pyinstaller --onefile --name "run" main.py
           
       - name: Ad-hoc Code Sign Binary
         run: |
-          codesign --force --deep --sign - "dist/run/run"
+          codesign --force --deep --sign - "dist/run"
           
       - uses: actions/upload-artifact@v4
         with:
-          name: macOS-Game-Folder
-          path: "dist/run/"
+          name: macOS-Standalone-Game
+          path: "dist/run"
