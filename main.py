@@ -241,6 +241,14 @@ right = pg.image.load(file_thing("res/dummy_right.png"))
 errortext = font.render("BG not found :(", True, (0, 0, 0))
 mmmfont = pgft.Font(None, 36)
 
+six_files = [None, None, None, None, None, None]
+def fill_out_six_files():
+    for i in range(6):
+        if os.path.exists(os.path.join(save_folder, f"data{i+1}.json")):
+            six_files[i] = save(f"data{i+1}.json")
+        else:
+            six_files[i] = {}
+
 mmbuttons = [pg.Rect(300, 150*x+75, 200, 75) for x in range(4)]
 mmbuttonstext = ["Start", "Load", "QUIT", "Delete"]
 savefile = None
@@ -313,23 +321,16 @@ framei = 0
 inspired = False
 ribbit = pg.mixer.Sound('res/sound/frog.mp3')
 
-playing = {
-    'home': float('-inf'),
-    '1': float('-inf'),
-    '2': float('-inf'),
-    '3': float('-inf'),
-    '4': float('-inf'),
-    '5': float('-inf'),
-    '6': float('-inf'),
-    '7': float('-inf'),
-    'CoR1': float('-inf'),
-    'Arcade': float('-inf'),
-    'Ping-Pong': float('-inf'),
-    "Space-Invaders": float('-inf'),
-    "PingPongWV": float('-inf')
-}
+def cv(v):
+    if v > 255: return 255
+    if v < 0: return 0
+    return v
 
-settings = save("saves/settings.json")
+if not os.path.exists(os.path.join(save_folder, "settings.json")):
+    save("settings.json", {"sfx": 1, "mus": 1})
+    settings = {"sfx": 1, "mus": 1}
+else:
+    settings = save("settings.json")
 sfx = settings['sfx']
 mus = settings['mus']
 
@@ -348,8 +349,11 @@ musID = {
     'Arcade': pg.mixer.Sound("res/sound/arcade.mp3"),
     'Ping-Pong': pg.mixer.Sound('res/sound/PingPong.mp3'),
     "Space-Invaders": pg.mixer.Sound('res/sound/SpaceInvaders.mp3'),
-    "PingPongWV": pg.mixer.Sound("res/sound/PingPong_WV.mp3")
+    "PingPongWV": pg.mixer.Sound("res/sound/PingPong_WV.mp3"),
+    "Casino": pg.mixer.Sound("res/sound/Casino.mp3")
 }
+
+playing = {music: float('-inf') for music in musID}
 
 def setup_dialogue(text, diaID=0, your_options=[],
                    font=pgft.SysFont(None, 36), name=None):
@@ -503,7 +507,7 @@ while run:
         minifont = pgft.SysFont(None, 12)
         minifont.render_to(screen, (660, 60), str((settings['sfx']*100)//1), (255, 255, 255))
         minifont.render_to(screen, (660, 160), str((settings['mus']*100)//1), (255, 255, 255))
-        save("saves/settings.json", settings)
+        save("settings.json", settings)
         sfx = settings['sfx']
         mus = settings['mus']
         clciked = False
@@ -524,6 +528,8 @@ while run:
                     run = False
                 elif recti == 1:
                     savem = True
+                    filled_out_six_files = False
+                    fill_out_six_files()
                 elif recti == 0:
                     mmmfont_read = now
                     
@@ -540,10 +546,11 @@ while run:
         if savem:
             screen.fill((200, 255, 255))
             for i in range(len(filerects)):
-                if os.path.exists(f'saves/data{i+1}.json'):
-                    file = save(f"saves/data{i+1}.json")
+                if six_files[i]:
+                    file = six_files[i]
                     if file.get("image", False):
-                        image = pg.transform.scale(pg.image.load(file_thing(file['image'])), filerects[i].size)
+                        image = pg.transform.scale(
+                        pg.image.load(file_thing(file['image'])), filerects[i].size)
                         screen.blit(image, filerects[i].topleft)
                     elif file.get("color", False):
                         pg.draw.rect(screen, file['color'], filerects[i])
@@ -556,7 +563,7 @@ while run:
             for rect in range(len(filerects)):
                 if filerects[rect].collidepoint(mouse) and clciked:
                     savem = False
-                    savefile = f'saves/data{rect+1}.json'
+                    savefile = f'data{rect+1}.json'
                     playing['home'] = float('-inf')
                     dialogue = def_dia()
                     current = save(savefile)
@@ -576,7 +583,7 @@ while run:
         if deleto:
             screen.fill((110, 20, 20))
             for i in range(len(filerects)):
-                if os.path.exists(f'saves/data{i+1}.json'):
+                if os.path.exists(os.path.join(save_folder, f'data{i+1}.json')):
                     pg.draw.rect(screen, (0, 255, 0), filerects[i])
                 else:
                     pg.draw.rect(screen, (0, 0, 0), filerects[i])
@@ -586,8 +593,8 @@ while run:
                 if filerects[rect].collidepoint(mouse) and clciked:
                     clciked = False
                     savem = False
-                    if os.path.exists(f'saves/data{rect+1}.json'):
-                        os.remove(f'saves/data{rect+1}.json')
+                    if os.path.exists(os.path.join(save_folder, f'data{rect+1}.json')):
+                        os.remove(os.path.join(save_folder, f'data{rect+1}.json'))
                     deleto = False
     if now - mmmfont_read < 1500 and mm and not savem:
         mmmfont.render_to(screen,
@@ -603,10 +610,12 @@ while run:
             current['mus'] = 'home'
         elif current['loc'][1:] == "'s_room":
             current['mus'] = f'{current['loc'][0]}'
-        elif current['loc'] in ["intersection1", "Arcade"]:
+        elif current['loc'] in ["intersection1", "Arcade", "DatCorner"]:
             current['mus'] = 'CoR1'
         elif current['loc'] == "Arcade1" and not game['on']:
             current['mus'] = 'Arcade'
+        elif current['loc'] == "CasinoEntrance":
+            current['mus'] = "Casino"
         for id, music in musID.items():
             if id != current['mus']:
                 playing[id] = float('-inf')
@@ -1927,7 +1936,7 @@ while run:
                                 game['on'] = False
                             if (pg.Rect(300, 45, 200, 50).collidepoint(
                                 mouse) and clciked) or (' ' in pressing):
-                                if game['vars']['bet'] < current['CasinoChips']:
+                                if game['vars']['bet'] <= current['CasinoChips']:
                                     game['vars']['rolling'] = True
                                 else:
                                     game['vars']['text'] = [now+1000, "Insufficient Funds"]
@@ -2068,22 +2077,22 @@ while run:
                             screen.blit(tripleb_surface, (0, 0))
                         elif game['vars']['effect'][1] == "Triple":
                             triple_surface = pg.Surface((800, 600), pg.SRCALPHA)
-                            triple_surface.fill((random.randint(0, 255),
-                                                 random.randint(0, 255),
-                                                 random.randint(0, 255),
-                                                 random.randint(0, 96)))
+                            triple_surface.fill((cv(random.randint(0, 255)),
+                                                 cv(random.randint(0, 255)),
+                                                 cv(random.randint(0, 255)),
+                                                 cv(random.randint(0, 96))))
                             screen.blit(triple_surface, (0, 0))
                         elif game['vars']['effect'][1] == "Double F":
                             doublef_surface = pg.Surface((800, 600), pg.SRCALPHA)
-                            doublef_surface.fill((255, 255, 0, (now-game['vars']['finished'])//2))
+                            doublef_surface.fill((255, 255, 0, cv((now-game['vars']['finished'])//2)))
                             screen.blit(doublef_surface, (0, 0))
                         elif game['vars']['effect'][1] == "small":
                             small_surface = pg.Surface((800, 600), pg.SRCALPHA)
-                            small_surface.fill((255, 255, 0, (now-game['vars']['finished'])//10))
+                            small_surface.fill((255, 255, 0, cv((now-game['vars']['finished'])//10)))
                             screen.blit(small_surface, (0, 0))
                         elif game['vars']['effect'][1] == "bruh":
                             bruh_surface = pg.Surface((800, 600), pg.SRCALPHA)
-                            bruh_surface.fill((0, 0, 0, (now-game['vars']['finished'])/3))
+                            bruh_surface.fill((0, 0, 0, cv((now-game['vars']['finished'])/3)))
                             screen.blit(bruh_surface, (0, 0))
                 elif game['ID'] == 3:
                     if game['vars']['read']:
@@ -2276,7 +2285,12 @@ while run:
                             casino_font.render_to(screen, (10, 280), game['vars']['text'][1])
                     else:
                         screen.fill((0, 0, 0))
-                        casino_font.render_to(screen, (10, 10), "Rules here", (255, 255, 255))
+                        casino_font.render_to(screen, (10, 10), "In this game you need for the sum of the value of your card to be as", (255, 255, 255))
+                        casino_font.render_to(screen, (10, 60), "close to 21 without going over. If you go over 21 you lose, same", (255, 255, 255))
+                        casino_font.render_to(screen, (10, 110), "applies for the dealer. If you both go over 21, you lose. Cards 2-10", (255, 255, 255))
+                        casino_font.render_to(screen, (10, 160), "are worth their value. Jack, Queen and King are worth 10. Aces can", (255, 255, 255))
+                        casino_font.render_to(screen, (10, 210), "be worth 1 or 11 depending on what benefits the player more", (255, 255, 255))
+                        casino_font.render_to(screen, (10, 260), "Click to start. Click ESC to exit and type to choose bet.", (255, 255, 255))
                         if clciked:
                             game['vars']['read'] = True
             elif game['type'] == "TEMPE":
