@@ -14,6 +14,37 @@ def file_thing(path):
     except Exception: base_path = os.path.abspath(".")
     return os.path.join(base_path, path.replace("\\", "/"))
 
+default = {
+    "loc": "start",
+    "mus": 'home',
+    'blowhornblew': 0,
+    "atebanana": False,
+    'touched_money': False,
+    "poster": False,
+    "sat_on_couch_count": 0,
+    "6Chips": False,
+    "Ping-Pong_high_score": 0,
+    "legend": False,
+    "inventory": [],
+    "got_key": False,
+    "CasinoChips": 0
+}
+
+save_folder = os.path.expanduser("~/Library/Application Support/CoR")
+os.makedirs(save_folder, exist_ok=True)
+
+def save(savefile, data=None):
+    path = os.path.join(save_folder, savefile)
+    if data is None:
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception:
+            save(savefile, default)
+            return default
+    with open(path, 'w', encoding='utf-8') as f:
+        json.dump(data, f, indent=4)
+
 WIDTH = 800
 HEIGHT = 600
 FPS = 30
@@ -187,10 +218,10 @@ images = {
     "DatCorner": pg.image.load(file_thing('res/DatCorner.png')).convert_alpha(),
     "DatCornerR": pg.image.load(file_thing('res/DatCornerR.png')).convert_alpha(),
     "DatCornerRB": pg.image.load(file_thing('res/DatCornerRB.png')).convert_alpha(),
-    "Arcade1": pg.image.load(file_thing('res/Arcade1.png')).convert_alpha(),
+    "Arcade1": pg.image.load(file_thing('res/arcade1.png')).convert_alpha(),
     "ppu": pg.image.load(file_thing('res/ping_pong_you.png')).convert_alpha(),
     "pph": pg.image.load(file_thing('res/ping_pong_him.png')).convert_alpha(),
-    "Arcade2": pg.image.load(file_thing('res/arcade2.png')).convert_alpha(),
+    "Arcade2": pg.image.load(file_thing('res/Arcade2.png')).convert_alpha(),
     "CasinoEntrance": pg.image.load(file_thing('res/CasinoEntrance.png')).convert_alpha(),
     "Roulette": pg.image.load(file_thing('res/roulette.png')).convert_alpha(),
     "CasinoSlot": pg.image.load(file_thing('res/CasinoSlot.png')).convert_alpha(),
@@ -199,6 +230,8 @@ images = {
     "LCE": pg.image.load(file_thing("res/LCE.png")).convert_alpha(),
     "CasinoBlackjack": pg.image.load(file_thing("res/CasinoBlackjack.png")).convert_alpha()
 }
+
+
 
 font = pg.font.Font(None, 72)
 pg.mixer.init()
@@ -228,21 +261,6 @@ filerects0 = [pg.Rect(200+150*x, 50, 100, 50) for x in range(3)]
 filerects1 = [pg.Rect(200+150*x, 500, 100, 50) for x in range(3)]
 filerects = filerects0 + filerects1
 slick = False
-default = {
-    "loc": "start",
-    "mus": 'home',
-    'blowhornblew': 0,
-    "atebanana": False,
-    'touched_money': False,
-    "poster": False,
-    "sat_on_couch_count": 0,
-    "6Chips": False,
-    "Ping-Pong_high_score": 0,
-    "legend": False,
-    "inventory": [],
-    "got_key": False,
-    "CasinoChips": 0
-}
 
 mbuttons = [pg.Rect(300, 150*x+37.5, 200, 75) for x in range(4)]
 mbuttonstext = ["Back", "Save", "Main Menu", "Quit"]
@@ -252,10 +270,10 @@ need_error = False
 plus = pg.image.load(file_thing("res/dummy_plus.png"))
 minus = pg.image.load(file_thing("res/dummy_minus.png"))
 frames = [pg.image.load(file_thing(f'res/frames/{x}.png')) for x in range(10)]
-casino_slots = [pg.image.load(file_thing(f'res/casino/slotmachine/{x}.png')) for x in range(20)]
-dsvcs = [pg.image.load(file_thing(f'res/casino/slotmachine/v/{x}.png')) for x in range(20)]
-blackjack_deck = [pg.image.load(file_thing(f'res/casino/blackjack/{x}.png')) for x in range(52)]
-blackjack_deck.append(pg.image.load(file_thing('res/casino/blackjack/empty.png')))
+casino_slots = [pg.image.load(file_thing(f'res/Casino/SlotMachine/{x}.png')) for x in range(20)]
+dsvcs = [pg.image.load(file_thing(f'res/Casino/SlotMachine/V/{x}.png')) for x in range(20)]
+blackjack_deck = [pg.image.load(file_thing(f'res/Casino/Blackjack/{x}.png')) for x in range(52)]
+blackjack_deck.append(pg.image.load(file_thing('res/Casino/Blackjack/empty.png')))
 def animate(frame):
     frame += 1
     if frame == 10:
@@ -294,17 +312,6 @@ current = None
 framei = 0
 inspired = False
 ribbit = pg.mixer.Sound('res/sound/frog.mp3')
-
-def save(savefile, data=None):
-    if data is None:
-        try:
-            with open(savefile, 'r', encoding='utf-8') as f:
-                return json.load(f)
-        except Exception:
-            save(savefile, default)
-            return default
-    with open(savefile, 'w', encoding='utf-8') as f:
-        json.dump(data, f, indent=4)
 
 playing = {
     'home': float('-inf'),
