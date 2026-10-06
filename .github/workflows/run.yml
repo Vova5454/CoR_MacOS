@@ -27,7 +27,7 @@ jobs:
 
     - name: Build macOS Executable
       run: |
-        pyinstaller --onefile --name run --copy-metadata pygame your_script.py
+        pyinstaller --onefile --name run --copy-metadata pygame main.py
 
     - name: Package Executable with Zip
       run: |
