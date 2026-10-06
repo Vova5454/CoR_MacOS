@@ -10,9 +10,12 @@ import sys
 
 
 def file_thing(path):
-    try: base_path = sys._MEIPASS
-    except Exception: base_path = os.path.abspath(".")
-    return os.path.join(base_path, path.replace("\\", "/"))
+    clean_path = path.replace("\\", "/")
+    if getattr(sys, 'frozen', False):
+        base_path = os.path.dirname(sys.executable)
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, clean_path)
 
 default = {
     "loc": "start",
@@ -288,8 +291,8 @@ def animate(frame):
         frame = 0
     return frames[frame]
 strongest = frames[9]
-saved = pg.mixer.Sound('res/sound/saved.mp3')
-bye = pg.mixer.Sound('res/sound/bye.mp3')
+saved = pg.mixer.Sound(file_thing('res/sound/saved.mp3'))
+bye = pg.mixer.Sound(file_thing('res/sound/bye.mp3'))
 
 deleto = False
 BOOK = [["Page 1", "I am about to go to job interview.",
@@ -309,9 +312,9 @@ BOOK = [["Page 1", "I am about to go to job interview.",
 TEXT = ["Aaron's Job Profile", "Name: Aaron", "Age: 35", "Position: CEO",
         "Company Name: GCH (Good Construction of Houses)",
         "Became CEO: 17 years ago"]
-cor1 = pg.mixer.Sound('res/sound/cor1.wav')
-emergency = pg.mixer.Sound('res/sound/emergency.mp3')
-sprite_hit = pg.mixer.Sound('res/sound/hit.mp3')
+cor1 = pg.mixer.Sound(file_thing('res/sound/cor1.wav'))
+emergency = pg.mixer.Sound(file_thing('res/sound/emergency.mp3'))
+sprite_hit = pg.mixer.Sound(file_thing('res/sound/hit.mp3'))
 savem = False
 casino_font = pgft.SysFont("Bell MT", 24)
 medium_casino_font = pgft.SysFont("Bell MT", 18)
@@ -319,7 +322,7 @@ tiny_casino_font = pgft.SysFont("Bell MT", 6)
 current = None
 framei = 0
 inspired = False
-ribbit = pg.mixer.Sound('res/sound/frog.mp3')
+ribbit = pg.mixer.Sound(file_thing('res/sound/frog.mp3'))
 
 def cv(v):
     if v > 255: return 255
@@ -338,19 +341,19 @@ mus = settings['mus']
 
 musID = {
     'home': cor1,
-    '1': pg.mixer.Sound("res/sound/1s_room.mp3"),
-    '2': pg.mixer.Sound("res/sound/2s_room.mp3"),
-    '3': pg.mixer.Sound("res/sound/3s_room.mp3"),
-    '4': pg.mixer.Sound("res/sound/4s_room.mp3"),
-    '5': pg.mixer.Sound("res/sound/5s_room.mp3"),
-    '6': pg.mixer.Sound("res/sound/6s_room.mp3"),
-    '7': pg.mixer.Sound("res/sound/7s_room.mp3"),
-    'CoR1': pg.mixer.Sound("res/sound/outside.mp3"),
-    'Arcade': pg.mixer.Sound("res/sound/arcade.mp3"),
-    'Ping-Pong': pg.mixer.Sound('res/sound/PingPong.mp3'),
-    "Space-Invaders": pg.mixer.Sound('res/sound/SpaceInvaders.mp3'),
-    "PingPongWV": pg.mixer.Sound("res/sound/PingPong_WV.mp3"),
-    "Casino": pg.mixer.Sound("res/sound/Casino.mp3")
+    '1': pg.mixer.Sound(file_thing("res/sound/1s_room.mp3")),
+    '2': pg.mixer.Sound(file_thing("res/sound/2s_room.mp3")),
+    '3': pg.mixer.Sound(file_thing("res/sound/3s_room.mp3")),
+    '4': pg.mixer.Sound(file_thing("res/sound/4s_room.mp3")),
+    '5': pg.mixer.Sound(file_thing("res/sound/5s_room.mp3")),
+    '6': pg.mixer.Sound(file_thing("res/sound/6s_room.mp3")),
+    '7': pg.mixer.Sound(file_thing("res/sound/7s_room.mp3")),
+    'CoR1': pg.mixer.Sound(file_thing("res/sound/outside.mp3")),
+    'Arcade': pg.mixer.Sound(file_thing("res/sound/arcade.mp3")),
+    'Ping-Pong': pg.mixer.Sound(file_thing('res/sound/PingPong.mp3')),
+    "Space-Invaders": pg.mixer.Sound(file_thing('res/sound/SpaceInvaders.mp3')),
+    "PingPongWV": pg.mixer.Sound(file_thing("res/sound/PingPong_WV.mp3")),
+    "Casino": pg.mixer.Sound(file_thing("res/sound/Casino.mp3"))
 }
 
 playing = {music: float('-inf') for music in musID}

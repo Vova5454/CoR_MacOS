@@ -1,11 +1,21 @@
 import pygame as pg
 import random
+import os
+import sys
 
+
+def file_thing(path):
+    clean_path = path.replace("\\", "/")
+    if getattr(sys, 'frozen', False):
+        base_path = os.path.dirname(sys.executable)
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, clean_path)
 
 class Player(pg.sprite.Sprite):
     def __init__(self, image):
         super().__init__()
-        self.image = pg.image.load(image)
+        self.image = pg.image.load(file_thing(image))
         self.rect = self.image.get_rect()
         self.rect.center = (400, 600-self.rect.height/2-15)
         self.boost = 1
@@ -60,7 +70,7 @@ class Player(pg.sprite.Sprite):
 class Meteor(pg.sprite.Sprite):
     def __init__(self, image, mx, my):
         super().__init__()
-        self.image = pg.image.load(image)
+        self.image = pg.image.load(file_thing(image))
         self.speedx = random.choice([random.randint(mx, my), -random.randint(mx, my)])
         self.speedy = random.randint(mx, my)
         self.rect = self.image.get_rect()
@@ -84,7 +94,7 @@ class Buff(pg.sprite.Sprite):
     def __init__(self, buff_tuple):
         super().__init__()
         self.buff_tuple = buff_tuple
-        self.image = pg.image.load(self.buff_tuple[1])
+        self.image = pg.image.load(file_thing(self.buff_tuple[1]))
         self.type = self.buff_tuple[0]
         self.rect = self.image.get_rect()
         self.speedx = random.randint(-3, 3)
@@ -134,9 +144,9 @@ class Laser():
             return
         self.exists = True
         if not self.light:
-            self.image = pg.image.load(f"{image[:4]}{lt}{image[4:]}")
+            self.image = pg.image.load(file_thing(f"{image[:4]}{lt}{image[4:]}"))
         else:
-            self.image = pg.image.load(f"{image[:4]}b{image[4:]}")
+            self.image = pg.image.load(file_thing(f"{image[:4]}b{image[4:]}"))
         self.rect = self.image.get_rect()
         self.rect.center = pos
 
@@ -152,7 +162,7 @@ class Laser():
 class DummySprite(pg.sprite.Sprite):
     def __init__(self, size, pos, dx, dy):
         super().__init__()
-        self.image = pg.image.load('res/gray.png')
+        self.image = pg.image.load(file_thing('res/gray.png'))
         self.image = pg.transform.scale(self.image, size)
         self.rect = self.image.get_rect()
         self.rect.topleft = pos
