@@ -1,28 +1,41 @@
-name: run
+name: Build macOS Executable
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
-  compile:
+  build-macos:
     runs-on: macos-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: |
-          pip install pyinstaller pygame
-          pyinstaller --onefile --name "run" main.py
-          
-      - name: Ad-hoc Code Sign Binary
-        run: |
-          codesign --force --deep --sign - "dist/run"
-          
-      - uses: actions/upload-artifact@v4
-        with:
-          name: macOS-Standalone-Game
-          path: "dist/run"
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pygame pyinstaller
+
+    - name: Build macOS Executable
+      run: |
+        pyinstaller --onefile --name run --copy-metadata pygame your_script.py
+
+    - name: Package Executable with Zip
+      run: |
+        cd dist
+        zip -r ../run-macOS.zip run
+
+    - name: Upload Build Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: run
+        path: run-macOS.zip
