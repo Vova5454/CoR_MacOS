@@ -19,7 +19,8 @@ jobs:
       - name: Install dependencies and Build
         run: |
           pip install pyinstaller pygame
-          pyinstaller --onefile --name "run" --collect-all pygame main.py
+          rm -f run.spec
+          pyinstaller --clean --onefile --name "run" --collect-all pygame main.py
           
       - name: Ad-hoc Code Sign Binary
         run: |
