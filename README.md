@@ -9,7 +9,7 @@ xattr -d com.apple.quarantine /Users/your_name/Downloads/Cor_MacOS-main/run
 
 chmod +x /Users/your_name/Downloads/CoR_MacOS-main/run
 
-If you see a pop up just click allow.s
+If you see a pop up just click allow.
 
 Instead of writing your_name in the paths write your username on your mac. You know? 
 
