@@ -234,50 +234,9 @@ images = {
     "CasinoBlackjack": pg.image.load(file_thing("res/CasinoBlackjack.png")).convert_alpha()
 }
 
-
-
-font = pg.font.Font(None, 72)
-pg.mixer.init()
 explore = pg.image.load(file_thing("res/map_explore_sign.png"))
 left = pg.image.load(file_thing("res/dummy_left.png"))
 right = pg.image.load(file_thing("res/dummy_right.png"))
-errortext = font.render("BG not found :(", True, (0, 0, 0))
-mmmfont = pgft.Font(None, 36)
-
-six_files = [None, None, None, None, None, None]
-def fill_out_six_files():
-    for i in range(6):
-        if os.path.exists(os.path.join(save_folder, f"data{i+1}.json")):
-            six_files[i] = save(f"data{i+1}.json")
-        else:
-            six_files[i] = {}
-
-mmbuttons = [pg.Rect(300, 150*x+75, 200, 75) for x in range(4)]
-mmbuttonstext = ["Start", "Load", "QUIT", "Delete"]
-savefile = None
-def def_dia():
-    return {'on': False,
-            'inoptions': False,
-            'text': [],
-            'your_options': [],
-            'responses': [],
-            'diaID': 0,
-            'processID': 0,
-            'JSR': False,
-            'font': None,
-            'name': None}
-dialogue = def_dia()
-mmmfont_read = -1500
-filerects0 = [pg.Rect(200+150*x, 50, 100, 50) for x in range(3)]
-filerects1 = [pg.Rect(200+150*x, 500, 100, 50) for x in range(3)]
-filerects = filerects0 + filerects1
-slick = False
-
-mbuttons = [pg.Rect(300, 150*x+37.5, 200, 75) for x in range(4)]
-mbuttonstext = ["Back", "Save", "Main Menu", "Quit"]
-mm = True
-m = False
-need_error = False
 plus = pg.image.load(file_thing("res/dummy_plus.png"))
 minus = pg.image.load(file_thing("res/dummy_minus.png"))
 frames = [pg.image.load(file_thing(f'res/frames/{x}.png')) for x in range(10)]
@@ -285,59 +244,15 @@ casino_slots = [pg.image.load(file_thing(f'res/Casino/SlotMachine/{x}.png')) for
 dsvcs = [pg.image.load(file_thing(f'res/Casino/SlotMachine/V/{x}.png')) for x in range(20)]
 blackjack_deck = [pg.image.load(file_thing(f'res/Casino/Blackjack/{x}.png')) for x in range(52)]
 blackjack_deck.append(pg.image.load(file_thing('res/Casino/Blackjack/empty.png')))
-def animate(frame):
-    frame += 1
-    if frame == 10:
-        frame = 0
-    return frames[frame]
-strongest = frames[9]
+
+pg.mixer.init()
+
+ribbit = pg.mixer.Sound(file_thing('res/sound/frog.mp3'))
 saved = pg.mixer.Sound(file_thing('res/sound/saved.mp3'))
 bye = pg.mixer.Sound(file_thing('res/sound/bye.mp3'))
-
-deleto = False
-BOOK = [["Page 1", "I am about to go to job interview.",
-         "I want the position called 'CEO'. Have no idea what it is but sounds cool",
-         "I really hope I get the position. I mean it's not like I have anything better to do!"],
-         ["Page 2", "I got accepted as the CEO! I start work next monday",
-          "That means I have a whole 2 days to do absolutely nothing!"],
-          ["Page 3", "So apparently I have to build houses.", "I managed to create my first house today!",
-           "It digs into the place right below the entrance to this world.",
-           "I made sure that if anyone were to come to this world there would be a room for them!",
-           "And if someone new were to come here I would just build another room for them!"],
-           ["Page 4", "After years of working I built the entire map!",
-            "I made sure to put all the important stuff like houses, a dummy, etc.",
-            "You can't forget the learning center! How will the people leave this world if they can't defend themsleves?",
-            "She always protects the Tower of Separation so I don't expect anyone to leave anytime soon.",
-            "It's actually weird. Why doesn't she want to leave? She would put her life on the line to keep people away from there!"]]
-TEXT = ["Aaron's Job Profile", "Name: Aaron", "Age: 35", "Position: CEO",
-        "Company Name: GCH (Good Construction of Houses)",
-        "Became CEO: 17 years ago"]
 cor1 = pg.mixer.Sound(file_thing('res/sound/cor1.wav'))
 emergency = pg.mixer.Sound(file_thing('res/sound/emergency.mp3'))
 sprite_hit = pg.mixer.Sound(file_thing('res/sound/hit.mp3'))
-savem = False
-casino_font = pgft.SysFont("Bell MT", 24)
-medium_casino_font = pgft.SysFont("Bell MT", 18)
-tiny_casino_font = pgft.SysFont("Bell MT", 6)
-current = None
-framei = 0
-inspired = False
-ribbit = pg.mixer.Sound(file_thing('res/sound/frog.mp3'))
-
-def cv(v):
-    if v > 255: return 255
-    if v < 0: return 0
-    return v
-
-if not os.path.exists(os.path.join(save_folder, "settings.json")):
-    save("settings.json", {"sfx": 1, "mus": 1})
-    settings = {"sfx": 1, "mus": 1}
-else:
-    settings = save("settings.json")
-sfx = settings['sfx']
-mus = settings['mus']
-
-## Add inventory
 
 musID = {
     'home': cor1,
@@ -358,6 +273,85 @@ musID = {
 
 playing = {music: float('-inf') for music in musID}
 
+font = pg.font.Font(None, 72)
+errortext = font.render("BG not found :(", True, (0, 0, 0))
+mmmfont = pgft.Font(None, 36)
+casino_font = pgft.SysFont("Bell MT", 24)
+medium_casino_font = pgft.SysFont("Bell MT", 18)
+tiny_casino_font = pgft.SysFont("Bell MT", 6)
+
+BOOK = [["Page 1", "I am about to go to job interview.",
+         "I want the position called 'CEO'. Have no idea what it is but sounds cool",
+         "I really hope I get the position. I mean it's not like I have anything better to do!"],
+         ["Page 2", "I got accepted as the CEO! I start work next monday",
+          "That means I have a whole 2 days to do absolutely nothing!"],
+          ["Page 3", "So apparently I have to build houses.", "I managed to create my first house today!",
+           "It digs into the place right below the entrance to this world.",
+           "I made sure that if anyone were to come to this world there would be a room for them!",
+           "And if someone new were to come here I would just build another room for them!"],
+           ["Page 4", "After years of working I built the entire map!",
+            "I made sure to put all the important stuff like houses, a dummy, etc.",
+            "You can't forget the learning center! How will the people leave this world if they can't defend themsleves?",
+            "She always protects the Tower of Separation so I don't expect anyone to leave anytime soon.",
+            "It's actually weird. Why doesn't she want to leave? She would put her life on the line to keep people away from there!"]]
+TEXT = ["Aaron's Job Profile", "Name: Aaron", "Age: 35", "Position: CEO",
+        "Company Name: GCH (Good Construction of Houses)",
+        "Became CEO: 17 years ago"]
+
+savem = False
+current = None
+deleto = False
+framei = 0
+inspired = False
+mmmfont_read = -1500
+filerects0 = [pg.Rect(200+150*x, 50, 100, 50) for x in range(3)]
+filerects1 = [pg.Rect(200+150*x, 500, 100, 50) for x in range(3)]
+filerects = filerects0 + filerects1
+slick = False
+mbuttons = [pg.Rect(300, 150*x+37.5, 200, 75) for x in range(4)]
+mbuttonstext = ["Back", "Save", "Main Menu", "Quit"]
+mm = True
+m = False
+need_error = False
+mmbuttons = [pg.Rect(300, 150*x+75, 200, 75) for x in range(4)]
+mmbuttonstext = ["Start", "Load", "QUIT", "Delete"]
+savefile = None
+
+if not os.path.exists(os.path.join(save_folder, "settings.json")):
+    save("settings.json", {"sfx": 1, "mus": 1})
+    settings = {"sfx": 1, "mus": 1}
+else:
+    settings = save("settings.json")
+sfx = settings['sfx']
+mus = settings['mus']
+
+## Add inventory
+
+def cv(v):
+    if v > 255: return 255
+    if v < 0: return 0
+    return v
+
+def animate(frame):
+    frame += 1
+    if frame == 10:
+        frame = 0
+    return frames[frame]
+strongest = frames[9]
+
+def def_dia():
+    return {'on': False,
+            'inoptions': False,
+            'text': [],
+            'your_options': [],
+            'responses': [],
+            'diaID': 0,
+            'processID': 0,
+            'JSR': False,
+            'font': None,
+            'name': None}
+dialogue = def_dia()
+
 def setup_dialogue(text, diaID=0, your_options=[],
                    font=pgft.SysFont(None, 36), name=None):
     cd = def_dia()
@@ -371,6 +365,14 @@ def setup_dialogue(text, diaID=0, your_options=[],
     cd['diaID'] = diaID
     return cd
 
+six_files = [None, None, None, None, None, None]
+def fill_out_six_files():
+    for i in range(6):
+        if os.path.exists(os.path.join(save_folder, f"data{i+1}.json")):
+            six_files[i] = save(f"data{i+1}.json")
+        else:
+            six_files[i] = {}
+
 def setup_game(g_type, g_id, objects={}, groups={}, g_vars={}, consts={}):
     return {
         "on": True,
@@ -382,7 +384,7 @@ def setup_game(g_type, g_id, objects={}, groups={}, g_vars={}, consts={}):
         "type": g_type
     }
 
-holding = False
+
 def def_game():
     return {
         "on": False,
@@ -394,7 +396,9 @@ def def_game():
         "type": None
     }
 game = def_game()
+
 frame = 0
+holding = False
 run = True
 while run:
     rdud = {}
