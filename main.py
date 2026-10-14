@@ -9,6 +9,11 @@ from sprites import Player, Meteor, Buff, Laser, DummySprite
 import sys
 
 
+#os.environ["SDL_WINDOWS_DPI_AWARENESS"] = "permonitorv2"
+"This command makes each pixel 1x1 instead the default 2x2"
+"Usually, pygame makes each pixel 2 times wider and higher."
+"If you remove the # from the line above that won't happen."
+
 def file_thing(path):
     clean_path = path.replace("\\", "/")
     if getattr(sys, 'frozen', False):
