@@ -187,8 +187,8 @@ interactions = {
                 (pg.Rect(297, 143, 126, 298), "ArcadeGame2"), 
                 (pg.Rect(536, 140, 132, 307), "ArcadeGame3")],
     "Arcade2": [(pg.Rect(262, 73, 201, 438), "ArcadeGame4")],
-    "CasinoSlot": [(pg.Rect(309, 32, 191, 428), "CasinoSlot")],
-    "CasinoBlackjack": [(pg.Rect(139, 138, 472, 288), "Blackjack")]
+    "CasinoSlot": [(pg.Rect(297, 0, 196, 475), "CasinoSlot")],
+    "CasinoBlackjack": [(pg.Rect(174, 84, 471, 332), "Blackjack")]
 }
 
 images = {
@@ -234,6 +234,11 @@ images = {
     "CasinoBlackjack": pg.image.load(file_thing("res/CasinoBlackjack.png")).convert_alpha()
 }
 
+icons = {
+    'key': pg.image.load(file_thing("res/icons/key.png")).convert_alpha(),
+    'null': pg.image.load(file_thing('res/icons/null.png')).convert_alpha()
+}
+
 explore = pg.image.load(file_thing("res/map_explore_sign.png"))
 left = pg.image.load(file_thing("res/dummy_left.png"))
 right = pg.image.load(file_thing("res/dummy_right.png"))
@@ -242,6 +247,8 @@ minus = pg.image.load(file_thing("res/dummy_minus.png"))
 frames = [pg.image.load(file_thing(f'res/frames/{x}.png')) for x in range(10)]
 casino_slots = [pg.image.load(file_thing(f'res/Casino/SlotMachine/{x}.png')) for x in range(20)]
 dsvcs = [pg.image.load(file_thing(f'res/Casino/SlotMachine/V/{x}.png')) for x in range(20)]
+inv_left = pg.image.load(file_thing("res/inv_left.png")).convert_alpha()
+inv_right = pg.image.load(file_thing("res/inv_right.png")).convert_alpha()
 blackjack_deck = [pg.image.load(file_thing(f'res/Casino/Blackjack/{x}.png')) for x in range(52)]
 blackjack_deck.append(pg.image.load(file_thing('res/Casino/Blackjack/empty.png')))
 
@@ -310,6 +317,7 @@ filerects = filerects0 + filerects1
 slick = False
 mbuttons = [pg.Rect(300, 150*x+37.5, 200, 75) for x in range(4)]
 mbuttonstext = ["Back", "Save", "Main Menu", "Quit"]
+page = 0
 mm = True
 m = False
 need_error = False
@@ -325,7 +333,8 @@ else:
 sfx = settings['sfx']
 mus = settings['mus']
 
-## Add inventory
+in_inventory = False
+inventory_page = 0
 
 def cv(v):
     if v > 255: return 255
@@ -365,13 +374,14 @@ def setup_dialogue(text, diaID=0, your_options=[],
     cd['diaID'] = diaID
     return cd
 
-six_files = [None, None, None, None, None, None]
+six_files = [[None, None, None, None, None, None] for _ in range(256)]
 def fill_out_six_files():
-    for i in range(6):
-        if os.path.exists(os.path.join(save_folder, f"data{i+1}.json")):
-            six_files[i] = save(f"data{i+1}.json")
-        else:
-            six_files[i] = {}
+    for i in range(256):
+        for j in range(6):
+            if os.path.exists(os.path.join(save_folder, f"data{j+1+6*i}.json")):
+                six_files[i][j] = save(f"data{j+1+6*i}.json")
+            else:
+                six_files[i][j] = {}
 
 def setup_game(g_type, g_id, objects={}, groups={}, g_vars={}, consts={}):
     return {
@@ -527,7 +537,6 @@ while run:
         for recti in range(len(mmbuttons)):
             if mmbuttons[recti].collidepoint(mouse) and clciked and not savem and not deleto:
                 clciked = False
-                # if recti == 2 and now-lastm>200:
                 if recti == 2:
                     bye.set_volume(sfx)
                     bye.play()
@@ -553,8 +562,8 @@ while run:
         if savem:
             screen.fill((200, 255, 255))
             for i in range(len(filerects)):
-                file = six_files[i]
-                if six_files[i]:
+                file = six_files[page][i]
+                if six_files[page][i]:
                     if file.get("image", False):
                         image = pg.transform.scale(
                         pg.image.load(file_thing(file['image'])), filerects[i].size)
@@ -565,13 +574,26 @@ while run:
                         pg.draw.rect(screen, (0, 255, 0), filerects[i])
                 else:
                     pg.draw.rect(screen, (0, 0, 0), filerects[i])
-                c1, c2 = filerects[i].center
                 if not file.get("Remove_Slot_Index", False):
-                    mmmfont.render_to(screen, (c1-10, c2-15), str(i+1), (255, 255, 255))
+                    text, rect = mmmfont.render(str(i+1+6*page), (255, 255, 255))
+                    rect.center = filerects[i].center
+                    screen.blit(text, rect)
+            mmmfont.render_to(screen, (400, 10), str(page+1))
+            screen.blit(minus, (0, 0))
+            screen.blit(plus, (800-plus.get_width(), 0))
+            if pg.Rect(0, 0, minus.get_width(), minus.get_height()).collidepoint(
+                mouse) and (clciked or pg.mouse.get_pressed()[2]):
+                page -= 1
+            if pg.Rect(800-plus.get_width(), 0, plus.get_width(), plus.get_height()).collidepoint(
+                mouse) and (clciked or pg.mouse.get_pressed()[2]):
+                page += 1
+            if page == -1: page = 255
+            if page == 256: page = 0
+
             for rect in range(len(filerects)):
                 if filerects[rect].collidepoint(mouse) and clciked:
                     savem = False
-                    savefile = f'data{rect+1}.json'
+                    savefile = f'data{rect+1+6*page}.json'
                     playing['home'] = float('-inf')
                     dialogue = def_dia()
                     current = save(savefile)
@@ -975,6 +997,45 @@ while run:
                         "Do you want some Casino Chips?", None], 6, [None, None, ["Yes", "No"]],
                         name="Chip Dealer") # TEMPE
                     clciked = False
+        if not game['on'] and not dialogue['on'] and not in_inventory:
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(700, 0, 100, 50))
+            mmmfont.render_to(screen, (710, 10), "inv.", (255, 255, 255))
+            if pg.Rect(700, 0, 100, 50).collidepoint(mouse) and clciked:
+                in_inventory = True
+                continue
+        if game['on'] or dialogue['on']: in_inventory = False
+        inventory_inspection = 'null'
+        if in_inventory:
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(0, 100, 800, 1))
+            pg.draw.rect(screen, (255, 255, 255), pg.Rect(50, 0, 600, 100))
+            pg.draw.rect(screen, (0, 0, 0), pg.Rect(700, 0, 100, 100))
+            mmmfont.render_to(screen, (710, 10), "inv.", (255, 255, 255))
+            if pg.Rect(700, 0, 100, 100).collidepoint(mouse) and clciked:
+                in_inventory = False
+            if inventory_page*6>len(current['inventory']):
+                inventory_page -= 1
+            if inventory_page < 0: inventory_page = 0
+            start_pos = 50
+            if len(current['inventory'])>0:
+                for i in range(6):
+
+                    if i+6*inventory_page<len(current['inventory']):
+                        screen.blit(icons[current['inventory'][i+6*inventory_page]], (start_pos, 0))
+                        if pg.Rect(start_pos, 0, 100, 100).collidepoint(mouse) and clciked:
+                            inventory_inspection = current['inventory'][i+6*inventory_page]
+                            iiid = i+6*inventory_page
+                    else:
+                        screen.blit(icons['null'], (start_pos, 0))
+                    start_pos += 100
+            screen.blit(inv_left, (0, 0))
+            if pg.Rect(0, 0, 50, 100).collidepoint(mouse) and clciked:
+                inventory_page -= 1
+            screen.blit(inv_right, (650, 0))
+            if pg.Rect(650, 0, 50, 100).collidepoint(mouse) and clciked:
+                inventory_page += 1
+        if inventory_inspection and inventory_inspection != 'null':
+            if inventory_inspection == 'key':
+                dialogue = setup_dialogue(["It's a key!", "What could it be for?"], font=pgft.SysFont(None, 32))
         if current['loc'] in ['kitchen', 'his_place']:
             if current['loc'] == 'kitchen':
                 screen.blit(strongest, (107, 360))
@@ -1136,7 +1197,6 @@ while run:
                         pg.draw.rect(screen, (255, 255, 0), game["objects"]['player'])
                         screen.blit(images['ppu'], game['objects']['player'].topleft)
                         ball = game['objects']['ball']
-                        # pg.draw.rect(screen, (255, 10, 10), game['objects']['clanker'])
                         screen.blit(images['pph'], game['objects']['clanker'].topleft)
                         mmmfont.render_to(screen, (10, 10), str(game['vars']['pscore']), (255, 255, 255))
                         mmmfont.render_to(screen, (773, 10), str(game['vars']['cscore']), (255, 255, 255))
@@ -1180,15 +1240,12 @@ while run:
                             if balle.left < 45 and dx < 0:
                                 dx = -dx
                         collided = False
-                        # if not game['objects']['clanker'].colliderect(ball):
                         if game['objects']['clanker'].center[1] > balle.center[1]:
                             game['objects']['clanker'].y -= game['consts']['clanker_speed']
                         if game['objects']['clanker'].center[1] < balle.center[1]:
                             game['objects']['clanker'].y += game['consts']['clanker_speed']
                         protective_layer = pg.Rect(15, game['objects']['player'].top, 15, 150)
                         protective_layer2 = pg.Rect(5, protective_layer.top, 10, 150)
-                        # pg.draw.rect(screen, (127, 0, 255), protective_layer)
-                        # pg.draw.rect(screen, (127, 127, 255), protective_layer2)
                         if (ball.colliderect(game['objects']['player'])
                             or ball.colliderect(
                                 protective_layer)
@@ -1198,9 +1255,6 @@ while run:
                                 game['vars']['dx'] *= -1
                                 collided = True
                         if ball.colliderect(game['objects']['clanker']) and game['vars']['dx'] > 0:
-                            # if game['objects']['ball'].top+12 > game['objects']['clanker'].top and game[
-                            #     "objects"
-                            # ]['ball'].bottom < game['objects']['clanker'].bottom+12:
                             game['vars']['dx'] *= -1
                             collided = True
                         if game['vars']['pscore'] >= 10 or game['vars']['cscore'] >= 10:
@@ -1605,7 +1659,6 @@ while run:
                             if arfae.collidepoint(mouse) and clciked:
                                 ae = [0, 0, 0, 0, 5, 5]
                                 mso = "add_enemy"
-                                # hdfs = [False for _ in range(12)]
                                 wyt = None
                             pg.draw.rect(screen, (196, 196, 196), rfew)
                             pg.draw.rect(screen, (196, 196, 196), rfeh)
@@ -2044,6 +2097,7 @@ while run:
                     else:
                         if game['vars']['slots'][0] or game['vars']['slots'][0] == 0:
                             screen.blit(casino_slots[game['vars']['slots'][0]], (180, 150))
+                            game['vars']['effect'] = [False, "None"]
                         else:
                             screen.blit(dsvcs[now%20], (180, 150))
                         if game['vars']['slots'][1] or game['vars']['slots'][1] == 0:
