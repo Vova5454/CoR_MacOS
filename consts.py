@@ -1,9 +1,11 @@
 import os
+import sys
 
 
 WIDTH = 800
 HEIGHT = 600
 FPS = 30
+SAMP_CAP = 10
 minb, maxb = 5, 5
 BOOK = [["Page 1", "I am about to go to job interview.",
          "I want the position called 'CEO'. Have no idea what it is but sounds cool",
@@ -22,6 +24,14 @@ BOOK = [["Page 1", "I am about to go to job interview.",
 TEXT = ["Aaron's Job Profile", "Name: Aaron", "Age: 35", "Position: CEO",
         "Company Name: GCH (Good Construction of Houses)",
         "Became CEO: 17 years ago"]
+
+def file_thing(path):
+    clean_path = path.replace("\\", "/")
+    if getattr(sys, 'frozen', False):
+        base_path = os.path.dirname(sys.executable)
+    else:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+    return os.path.join(base_path, clean_path)
 
 save_folder = os.path.expanduser("~/Library/Application Support/CoR")
 save_folder = os.path.join(save_folder, "CoR")
